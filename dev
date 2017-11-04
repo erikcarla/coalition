@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Environment variables
+export APP_PORT=${APP_PORT:-8080}
+export DB_HOST=${DB_HOST:-mysql}
+export DB_PORT=${DB_PORT:-3306}
+export DB_NAME=${DB_NAME:-coalition}
+export DB_USER=${DB_USER:-root}
+export DB_ROOT_PASS=${DB_ROOT_PASS:-secret}
+export REDIS_PORT=${REDIS_PORT:-6379}
+
+COMPOSE="docker-compose -f docker-compose.yml"
+
+if [ $# -gt 0 ];then
+    if [ "$1" == "artisan" ]; then
+        shift 1
+        $COMPOSE run \
+            php-fpm \
+            php artisan "$@"
+
+    elif [ "$1" == "composer" ]; then
+        shift 1
+        $COMPOSE run \
+            -w /var/www \
+            php-fpm \
+            composer "$@"
+
+    elif [ "$1" == "redis" ]; then
+        shift 1
+        $COMPOSE run \
+            redis redis-cli "$@" \
+            -h redis \
+            -p $REDIS_PORT
+
+    elif [ "$1" == "test" ]; then
+        shift 1
+        $COMPOSE run \
+            -w /var/www \
+            php-fpm \
+            ./vendor/bin/phpunit "$@"
+
+    else
+        $COMPOSE "$@"
+    fi
+else
+    $COMPOSE ps
+fi
