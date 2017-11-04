@@ -9,87 +9,117 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-            @endif
+        <div class="panel-body">
+            @include('common.errors')
 
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
+            <form action="" method="POST" class="form-horizontal">
+                {{ csrf_field() }}
+
+                <div class="form-group">
+                    <label for="product" class="col-sm-3 control-label">Product Name</label>
+
+                    <div class="col-sm-6">
+                        <input type="text" name="name" id="product-name" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product" class="col-sm-3 control-label">Qty</label>
+
+                    <div class="col-sm-6">
+                        <input type="number" name="qty" id="product-qty" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product" class="col-sm-3 control-label">Price</label>
+
+                    <div class="col-sm-6">
+                        <input type="number" name="price" id="product-price" class="form-control">
+                    </div>
                 </div>
 
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
+                <div class="form-group">
+                    <div class="col-sm-offset-3 col-sm-6">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fa fa-plus"></i> Add Product
+                        </button>
+                    </div>
                 </div>
+            </form>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Current Products
+            </div>
+
+            <div class="panel-body">
+                <table class="table table-striped product-table">
+
+                    <!-- Table Headings -->
+                    <thead>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Datetime</th>
+                        <th>Total</th>
+                    </thead>
+
+                    <!-- Table Body -->
+                    <tbody>
+                        @if (!empty($products))
+                            @foreach ($products as $product)
+                                <tr class="product">
+                                    <!-- Product Name -->
+                                    <td class="table-text name">
+                                        <div>{{ $product['name'] }}</div>
+                                    </td>
+                                    <td class="table-text qty">
+                                        <div>{{ $product['qty'] }}</div>
+                                    </td>
+                                    <td class="table-text price">
+                                        <div>{{ $product['price'] }}</div>
+                                    </td>
+                                    <td class="table-text date">
+                                        <div>{{ $product['date'] }}</div>
+                                    </td>
+                                    <td class="table-text total">
+                                        <div>{{ $product['qty'] * $product['price'] }}</div>
+                                    </td>
+
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
             </div>
         </div>
+
     </body>
+
+    <script>
+$(document).ready(function() {
+    $('form').submit(function(e){
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/product',
+            data: $('form').serialize(),
+            success: function(data) {
+                var cloner = $('.product').first().clone();
+                $('.name div', cloner).text(data.name);
+                $('.qty div', cloner).text(data.qty);
+                $('.price div', cloner).text(data.price);
+                $('.date div', cloner).text(data.date);
+                $('.total div', cloner).text(data.qty * data.price);
+                $('tbody').append(cloner);
+            }
+        });
+    });
+});
+    </script>
 </html>
